@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FRIDAY — Desktop AI Operating Assistant</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Top Navigation -->
+        <header class="top-nav">
+            <div class="logo-group">
+                <div class="logo-orb-mini"></div>
+                <div class="logo-text">
+                    <h1>FRIDAY</h1>
+                    <span class="subtext">Desktop AI Assistant</span>
+                </div>
+            </div>
+
+            <div class="status-pills">
+                <div class="pill" id="mediaStatusPill">
+                    <i class="fa-solid fa-film"></i>
+                    <span id="mediaCountText">Scanning Media...</span>
+                </div>
+                <div class="pill active" id="systemStatusPill">
+                    <span class="status-dot"></span>
+                    <span id="systemStateText">Ready</span>
+                </div>
+                <button class="icon-btn" id="openSettingsBtn" title="Settings">
+                    <i class="fa-solid fa-sliders"></i>
+                </button>
+            </div>
+        </header>
+
+        <!-- Main Workspace -->
+        <main class="main-content">
+            <!-- Left / Center: Interactive AI & Feed -->
+            <section class="assistant-pane">
+                <!-- Visualizer Core -->
+                <div class="ai-visualizer">
+                    <div class="orb-container" id="orbContainer">
+                        <div class="orb-glow"></div>
+                        <div class="orb-ring ring-1"></div>
+                        <div class="orb-ring ring-2"></div>
+                        <div class="orb-core">
+                            <i class="fa-solid fa-atom"></i>
+                        </div>
+                    </div>
+                    <div class="voice-status-text" id="voiceStatusText">Listening for commands...</div>
+                </div>
+
+                <!-- Conversation Stream -->
+                <div class="chat-viewport" id="chatViewport">
+                    <div class="message system-msg">
+                        <div class="avatar"><i class="fa-solid fa-robot"></i></div>
+                        <div class="bubble">
+                            <p><strong>FRIDAY Online.</strong> I am ready to assist you. Speak by clicking the mic below, or type commands like <code>open Notepad</code>, <code>play Interstellar</code>, or <code>organize downloads</code>.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Safety Confirmation Banner (Appears dynamically) -->
+                <div class="confirmation-banner hidden" id="confirmationBanner">
+                    <div class="confirm-content">
+                        <div class="confirm-icon"><i class="fa-solid fa-triangle-exclamation"></i></div>
+                        <div class="confirm-text">
+                            <h4>Confirmation Required</h4>
+                            <p id="confirmDescText">Are you sure you want to proceed?</p>
+                        </div>
+                    </div>
+                    <div class="confirm-actions">
+                        <button class="btn btn-confirm" id="btnConfirmAction"><i class="fa-solid fa-check"></i> Confirm</button>
+                        <button class="btn btn-cancel" id="btnCancelAction"><i class="fa-solid fa-xmark"></i> Cancel</button>
+                    </div>
+                </div>
+
+                <!-- Input Dock -->
+                <div class="input-dock">
+                    <button class="mic-btn" id="micToggleBtn" title="Click to speak (Voice Recognition)">
+                        <i class="fa-solid fa-microphone"></i>
+                    </button>
+                    <input type="text" id="commandInput" placeholder="Ask FRIDAY or type a command... (e.g., 'open Chrome and search for AI')" autocomplete="off">
+                    <button class="send-btn" id="sendBtn" title="Send command">
+                        <i class="fa-solid fa-arrow-up"></i>
+                    </button>
+                </div>
+            </section>
+
+            <!-- Right Sidebar: Quick Actions & Tools -->
+            <aside class="quick-dock" id="quickDock">
+                <div class="dock-header">
+                    <h3><i class="fa-solid fa-bolt"></i> Quick Controls</h3>
+                </div>
+                <div class="dock-sections" id="dockSections">
+                    <!-- Populated dynamically via JS -->
+                </div>
+            </aside>
+        </main>
+    </div>
+
+    <!-- Settings Modal -->
+    <div class="modal-overlay hidden" id="settingsModal">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3><i class="fa-solid fa-gear"></i> Settings & Preferences</h3>
+                <button class="close-btn" id="closeSettingsBtn"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="modal-body">
+                <div class="setting-item">
+                    <div class="setting-label">
+                        <strong>Text-to-Speech (Voice Output)</strong>
+                        <span>Spoken vocal responses for assistant actions.</span>
+                    </div>
+                    <label class="switch">
+                        <input type="checkbox" id="ttsToggle" checked>
+                        <span class="slider round"></span>
+                    </label>
+                </div>
+
+                <div class="setting-item">
+                    <div class="setting-label">
+                        <strong>Launch on Windows Startup</strong>
+                        <span>Automatically boot ZYRA in the background with Windows.</span>
+                    </div>
+                    <label class="switch">
+                        <input type="checkbox" id="startupToggle">
+                        <span class="slider round"></span>
+                    </label>
+                </div>
+
+                <div class="setting-item vertical">
+                    <div class="setting-label">
+                        <strong>AI API Key (Gemini / OpenAI / Ollama)</strong>
+                        <span>Enter your free Google Gemini API key or OpenAI key for unlimited dynamic generation.</span>
+                    </div>
+                    <input type="password" id="apiKeyInput" placeholder="Paste Gemini (AIza...) or OpenAI (sk-...) key" class="text-input" style="width: 100%; padding: 8px 12px; background: #0f172a; border: 1px solid var(--border-color); border-radius: 6px; color: white;">
+                </div>
+
+                <div class="setting-item vertical">
+                    <div class="setting-label">
+                        <strong>Voice Speed (Rate)</strong>
+                        <span id="rateValueLabel">175 WPM</span>
+                    </div>
+                    <input type="range" id="ttsRateSlider" min="100" max="250" value="175" class="range-slider">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-primary" id="saveSettingsBtn">Save Settings</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="/static/js/app.js"></script>
+</body>
+</html>

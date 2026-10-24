@@ -1,0 +1,30 @@
+{
+    "assistant_name": "FRIDAY",
+    "user_name": "Sabareesh",
+    "user_title": "sir",
+    "chrome_profile": "Sabareesh",
+    "voice_gender": "female",
+    "wake_words": [
+        "hey friday",
+        "friday",
+        "hey zyra",
+        "zyra"
+    ],
+    "require_confirmation": true,
+    "tts_enabled": false,
+    "tts_rate": 180,
+    "tts_volume": 1.0,
+    "stt_language": "en-IN",
+    "browser": "chrome",
+    "llm_provider": "local_rules",
+    "ollama_url": "http://localhost:11434",
+    "ollama_model": "llama3.2:3b",
+    "api_key": "",
+    "gemini_api_key": "",
+    "openai_api_key": "",
+    "microphone_index": null,
+    "browser_bridge_port": 5005,
+    "custom_search_paths": [],
+    "run_on_startup": false,
+    "safe_mode": true
+}
