@@ -11,6 +11,11 @@ import ctypes
 from ctypes import wintypes
 from zyra.safety import safety_guard
 
+try:
+    import uiautomation as auto
+except ImportError:
+    auto = None
+
 user32 = ctypes.windll.user32
 
 class WindowsManager:
@@ -193,7 +198,66 @@ class WindowsManager:
         except Exception as exc:
             return f"Could not focus window: {exc}"
 
+    def close_all_windows(self) -> str:
+        """Closes all open application windows on the desktop."""
+        from zyra.config import config
+        user_title = config.get("user_title", "sir")
+        windows = self.list_open_windows()
+        closed_titles = []
+        skip_titles = {
+            "program manager", "settings", "default ime", "taskbar",
+            "windows input experience", "start", "search", "zyra", "friday"
+        }
+
+        for hwnd, title in windows:
+            t_lower = title.lower()
+            if any(s in t_lower for s in skip_titles):
+                continue
+            try:
+                user32.PostMessageW(hwnd, 0x0010, 0, 0)  # WM_CLOSE
+                closed_titles.append(title)
+            except Exception:
+                pass
+
+        if auto:
+            try:
+                root = auto.GetRootControl()
+                for child in root.GetChildren():
+                    name = (child.Name or "").strip()
+                    name_lower = name.lower()
+                    if name and not any(s in name_lower for s in skip_titles):
+                        if not any(name == ct for ct in closed_titles):
+                            try:
+                                pattern = child.GetWindowPattern()
+                                if pattern:
+                                    pattern.Close()
+                                    closed_titles.append(name)
+                            except Exception:
+                                pass
+            except Exception:
+                pass
+
+        if closed_titles:
+            unique_closed = list(dict.fromkeys(closed_titles))
+            summary = ", ".join(unique_closed[:5]) + ("..." if len(unique_closed) > 5 else "")
+            return f"Closed {len(unique_closed)} application window(s) ({summary}), {user_title}."
+
+        try:
+            import pyautogui
+            pyautogui.hotkey("alt", "f4")
+            return f"Closed open applications in the window, {user_title}."
+        except Exception:
+            return f"No open application windows were found to close, {user_title}."
+
     def close_window(self, query: str = "") -> str:
+        clean = query.lower().strip()
+        if clean in {
+            "all", "all windows", "all the windows", "all apps", "all the apps",
+            "all tabs", "all the tabs", "all the apps in the window",
+            "all apps in the window", "all apps in window", "everything"
+        }:
+            return self.close_all_windows()
+
         if query:
             hwnd = self.find_window_by_title(query)
             if not hwnd:

@@ -147,11 +147,14 @@ class AIEngine:
                 folder_target = self.memory.last_folder or "C:\\Sabareesh"
             if folder_target.lower() == "sabareesh":
                 folder_target = "C:\\Sabareesh"
-            import shutil, subprocess
-            code_bin = shutil.which("code")
-            if code_bin:
-                subprocess.Popen([code_bin, folder_target], shell=True)
-                return f"Opened folder '{folder_target}' in VS Code, {user_title}."
+            try:
+                import shutil, subprocess
+                code_bin = shutil.which("code")
+                if code_bin:
+                    subprocess.Popen([code_bin, folder_target], shell=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+                    return f"Opened folder '{folder_target}' in VS Code, {user_title}."
+            except Exception:
+                pass
             windows_manager.focus_window("Visual Studio Code")
             time.sleep(0.3)
             screen_operator.press_key("ctrl+k ctrl+o")
@@ -313,14 +316,30 @@ class AIEngine:
             target = self.resolve_pronouns(target)
             return windows_manager.minimize_window(target)
 
+        # Close all windows / apps / tabs
+        if lower in {
+            "close all tabs", "close all the tabs", "close all apps",
+            "close all the apps", "close all the apps in the window",
+            "close all apps in the window", "close all apps in window",
+            "close all windows", "close all the windows", "close everything"
+        }:
+            return windows_manager.close_all_windows()
+
         match = re.match(r"^(?:close)\s+(?:the\s+)?(?:window\s+)?(.+)?$", cmd, re.IGNORECASE)
         if match:
             target = match.group(1) or ""
-            if target.lower() in {"it", "this", "window", "active window", "the window", ""}:
+            target_lower = target.lower().strip()
+            if target_lower in {
+                "all", "all tabs", "all the tabs", "all apps", "all the apps",
+                "all windows", "all the windows", "all the apps in the window",
+                "all apps in the window", "all apps in window", "everything"
+            }:
+                return windows_manager.close_all_windows()
+            if target_lower in {"it", "this", "window", "active window", "the window", ""}:
                 return windows_manager.close_window("")
-            if target.lower() in {"tab", "this tab", "current tab", "chrome tab"}:
+            if target_lower in {"tab", "this tab", "current tab", "chrome tab"}:
                 return browser_manager.tab_action("close tab")
-            if target.lower() in {"chrome", "browser"}:
+            if target_lower in {"chrome", "browser"}:
                 return browser_manager.tab_action("close browser")
             return windows_manager.close_window(target)
 

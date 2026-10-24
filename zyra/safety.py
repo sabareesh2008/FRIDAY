@@ -15,9 +15,19 @@ class RiskLevel(Enum):
 class SafetyGuard:
     def __init__(self):
         self._pending_action: Optional[Dict[str, Any]] = None
-        self._log_dir = Path.home() / ".zyra"
-        self._log_file = self._log_dir / "actions.log"
-        self._init_log()
+        try:
+            d = Path.home() / ".zyra"
+            d.mkdir(parents=True, exist_ok=True)
+            self._log_dir = d
+            self._log_file = d / "actions.log"
+            # Test access
+            with open(self._log_file, "a", encoding="utf-8") as f:
+                pass
+        except Exception:
+            d = Path.cwd() / ".zyra"
+            d.mkdir(parents=True, exist_ok=True)
+            self._log_dir = d
+            self._log_file = d / "actions.log"
 
     def _init_log(self):
         try:

@@ -198,7 +198,10 @@ class BrowserManager:
 
         results = []
         for hp in history_paths:
-            if not hp.exists():
+            try:
+                if not hp.exists():
+                    continue
+            except (PermissionError, OSError):
                 continue
             # Copy to temp file to prevent database locked error if browser is currently running
             temp_db = Path(tempfile.gettempdir()) / f"zyra_hist_{os.getpid()}.sqlite"
@@ -301,27 +304,26 @@ class BrowserManager:
     def get_chrome_profile_directory(profile_query: str = "sabareesh") -> Optional[str]:
         """Inspects Chrome Local State to find matching profile directory (e.g. Profile 42 for Sabareesh)."""
         clean_q = profile_query.lower().strip()
-        local_state = Path(os.environ.get("LOCALAPPDATA", "")) / "Google" / "Chrome" / "User Data" / "Local State"
-        if not local_state.exists():
-            return None
         try:
-            with open(local_state, "r", encoding="utf-8") as f:
-                data = json.load(f)
-            cache = data.get("profile", {}).get("info_cache", {})
-            # Exact match first (e.g. "Sabareesh" vs "Sabareesh_")
-            for p_dir, p_info in cache.items():
-                name = p_info.get("name", "").lower()
-                user_name = p_info.get("user_name", "").lower()
-                if clean_q == name or clean_q == user_name:
-                    return p_dir
-            # Fuzzy / Substring match
-            for p_dir, p_info in cache.items():
-                name = p_info.get("name", "").lower()
-                user_name = p_info.get("user_name", "").lower()
-                if clean_q in name or clean_q in user_name:
-                    return p_dir
+            local_state = Path(os.environ.get("LOCALAPPDATA", "")) / "Google" / "Chrome" / "User Data" / "Local State"
+            if local_state.exists():
+                with open(local_state, "r", encoding="utf-8") as f:
+                    data = json.load(f)
+                cache = data.get("profile", {}).get("info_cache", {})
+                for p_dir, p_info in cache.items():
+                    name = p_info.get("name", "").lower()
+                    user_name = p_info.get("user_name", "").lower()
+                    if clean_q == name or clean_q == user_name:
+                        return p_dir
+                for p_dir, p_info in cache.items():
+                    name = p_info.get("name", "").lower()
+                    user_name = p_info.get("user_name", "").lower()
+                    if clean_q in name or clean_q in user_name:
+                        return p_dir
         except Exception:
             pass
+        if "sabareesh" in clean_q:
+            return "Profile 42"
         return None
 
     def launch_chrome(self, url: Optional[str] = None, profile: Optional[str] = "Sabareesh") -> str:

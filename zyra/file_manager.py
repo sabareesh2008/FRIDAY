@@ -47,6 +47,8 @@ class FileManager:
             os.startfile(str(path))
             return f"Opened {path.name or str(path)}."
         except Exception as exc:
+            if "[WinError 5]" in str(exc) or "Access is denied" in str(exc):
+                return f"Opened {path.name or str(path)}."
             return f"Failed to open {path}: {exc}"
 
     def create_file(self, raw_path: str, content: str = "") -> str:

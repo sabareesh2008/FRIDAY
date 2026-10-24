@@ -158,7 +158,7 @@ class TestMasterUpgrade(unittest.TestCase):
     # 6. Safety Guard 3-Tier Risk Logging
     def test_action_logging(self):
         safety_guard.log_action("test_action", "secret=my_secret_token", RiskLevel.LOW, "SUCCESS")
-        log_file = Path.home() / ".zyra" / "actions.log"
+        log_file = safety_guard._log_file
         self.assertTrue(log_file.exists())
         content = log_file.read_text(encoding="utf-8")
         self.assertIn("[LOW] [test_action]", content)
@@ -199,6 +199,18 @@ class TestMasterUpgrade(unittest.TestCase):
     def test_open_in_vscode_command(self):
         res = ai_engine.parse_and_execute("open suggested folder in vs code")
         self.assertTrue("VS Code" in res or "Code" in res)
+
+    def test_close_all_tabs_closes_windows(self):
+        res = ai_engine.parse_and_execute("close all tabs")
+        self.assertTrue("Closed" in res or "window" in res.lower() or "application" in res.lower())
+
+    def test_close_all_apps(self):
+        res = ai_engine.parse_and_execute("close all apps")
+        self.assertTrue("Closed" in res or "window" in res.lower() or "application" in res.lower())
+
+    def test_close_all_the_apps_in_the_window(self):
+        res = ai_engine.parse_and_execute("close all the apps in the window")
+        self.assertTrue("Closed" in res or "window" in res.lower() or "application" in res.lower())
 
 if __name__ == "__main__":
     unittest.main()

@@ -40,6 +40,8 @@ test_scratch/
 test_scratch_master/
 coding_test_scratch*/
 .anchor
+.zyra/
+screenshots/
 
 # OS Artifacts
 Thumbs.db

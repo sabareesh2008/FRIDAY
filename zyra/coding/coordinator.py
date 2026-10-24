@@ -145,21 +145,29 @@ class CodingCoordinator:
         ]
         # 1. Search if it already exists
         for base in candidates:
-            if base.exists():
-                p = base / folder_name
-                if p.exists() and p.is_dir():
-                    return p.resolve()
-                try:
-                    for sub in base.iterdir():
-                        if sub.is_dir() and sub.name.lower() == folder_name.lower():
-                            return sub.resolve()
-                except Exception:
-                    pass
+            try:
+                if base.exists():
+                    p = base / folder_name
+                    if p.exists() and p.is_dir():
+                        return p.resolve()
+                    try:
+                        for sub in base.iterdir():
+                            if sub.is_dir() and sub.name.lower() == folder_name.lower():
+                                return sub.resolve()
+                    except Exception:
+                        pass
+            except (PermissionError, OSError):
+                continue
 
-        # 2. If it does not exist, create it on Desktop (most accessible to user)
-        new_dir = home / "Desktop" / folder_name
-        new_dir.mkdir(parents=True, exist_ok=True)
-        return new_dir.resolve()
+        # 2. If it does not exist, create it on Desktop or local workspace
+        try:
+            new_dir = home / "Desktop" / folder_name
+            new_dir.mkdir(parents=True, exist_ok=True)
+            return new_dir.resolve()
+        except Exception:
+            new_dir = Path.cwd() / "zyra_workspace" / folder_name
+            new_dir.mkdir(parents=True, exist_ok=True)
+            return new_dir.resolve()
 
     @staticmethod
     def _extract_filename(command: str, lang: LanguageSpec) -> str:

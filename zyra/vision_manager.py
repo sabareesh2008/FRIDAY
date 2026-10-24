@@ -14,11 +14,22 @@ from zyra.windows_manager import windows_manager
 
 class VisionManager:
     def __init__(self):
-        self.screenshots_dir = Path.home() / "Desktop" / "ZYRA_Screenshots"
+        try:
+            p = Path.home() / "Desktop" / "ZYRA_Screenshots"
+            p.mkdir(parents=True, exist_ok=True)
+            self.screenshots_dir = p
+        except Exception:
+            p = Path.cwd() / "screenshots"
+            p.mkdir(parents=True, exist_ok=True)
+            self.screenshots_dir = p
 
     def capture_screenshot(self, filename: Optional[str] = None) -> Optional[str]:
         """Captures desktop or active screen and returns saved image path."""
-        self.screenshots_dir.mkdir(parents=True, exist_ok=True)
+        try:
+            self.screenshots_dir.mkdir(parents=True, exist_ok=True)
+        except Exception:
+            self.screenshots_dir = Path.cwd() / "screenshots"
+            self.screenshots_dir.mkdir(parents=True, exist_ok=True)
         fname = filename or f"screenshot_{int(time.time())}.jpg"
         save_path = self.screenshots_dir / fname
 

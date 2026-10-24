@@ -9,8 +9,18 @@ from zyra.config import config
 
 class RemoteTaskManager:
     def __init__(self):
-        self._queue_file = Path.home() / ".zyra" / "task_queue.json"
-        self._queue_file.parent.mkdir(parents=True, exist_ok=True)
+        try:
+            d = Path.home() / ".zyra"
+            d.mkdir(parents=True, exist_ok=True)
+            self._queue_file = d / "task_queue.json"
+            # Test write access
+            if not self._queue_file.exists():
+                with open(self._queue_file, "w", encoding="utf-8") as f:
+                    f.write("[]")
+        except Exception:
+            d = Path.cwd() / ".zyra"
+            d.mkdir(parents=True, exist_ok=True)
+            self._queue_file = d / "task_queue.json"
 
     def _load_queue(self) -> List[Dict[str, Any]]:
         if not self._queue_file.exists():
